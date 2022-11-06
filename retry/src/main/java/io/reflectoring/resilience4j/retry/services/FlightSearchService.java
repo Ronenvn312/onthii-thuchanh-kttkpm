@@ -62,6 +62,7 @@ public class FlightSearchService {
                 new Flight("XY 732", date, from, to),
                 new Flight("XY 746", date, from, to)
         );
+        
         System.out.println("Flight search successful");
         SearchResponse response = new SearchResponse();
         response.setFlights(flights);

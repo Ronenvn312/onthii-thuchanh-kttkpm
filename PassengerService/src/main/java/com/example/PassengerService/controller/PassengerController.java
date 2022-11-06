@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.PassengerService.entity.Billing;
 import com.example.PassengerService.entity.Passenger;
 import com.example.PassengerService.service.PassengerService;
+import com.example.PassengerService.service.failures.RateLimitFailNTimes;
 
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
@@ -53,7 +54,33 @@ public class PassengerController {
 			}
 		return null;
 	}
-
+	@GetMapping("/retry-reate-limit")
+	public Billing reateLimitPassengerService() {
+		RetryConfig config = RetryConfig
+				.custom()
+				.maxAttempts(3)
+				.waitDuration(Duration.of(2, SECONDS))
+				.build();
+		RetryRegistry registry = RetryRegistry.of(config);
+		 Retry retry = registry.retry("passengerServicec",config);
+		 Retry.EventPublisher publisher = retry.getEventPublisher();
+		 publisher.onRetry(event -> System.out.println(event.toString()));
+	     publisher.onSuccess(event -> System.out.println(event.toString()));
+	      
+	    passengerService.setPotentialFailure(new RateLimitFailNTimes(2));
+	    
+		CheckedFunction0<Billing> retryingPassengerFindBill 
+			= Retry.decorateCheckedSupplier(retry, () -> passengerService.httpSearchBill(17));
+		Billing response;
+			try {
+				response = retryingPassengerFindBill.apply();
+				return response;
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+//				e.printStackTrace();
+			}
+		return null;
+	}
 	@GetMapping("/find-all")
 	public List<Passenger> findAll() {
 		return passengerService.findAll();

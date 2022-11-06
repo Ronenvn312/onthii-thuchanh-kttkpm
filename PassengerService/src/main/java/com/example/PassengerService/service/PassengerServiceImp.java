@@ -3,7 +3,6 @@ package com.example.PassengerService.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +12,14 @@ import org.springframework.web.client.RestTemplate;
 import com.example.PassengerService.dao.PassengerRespository;
 import com.example.PassengerService.entity.Billing;
 import com.example.PassengerService.entity.Passenger;
+import com.example.PassengerService.service.failures.NoFailure;
+import com.example.PassengerService.service.failures.PotentialFailure;
+
 
 @Service
 public class PassengerServiceImp implements PassengerService{
+	PotentialFailure potentialFailure = new NoFailure();
+	
 	static String url_billing = "http://localhost:9080/billing";
 	private static RestTemplate RestTemplate = new RestTemplate();
 	@Autowired
@@ -56,6 +60,8 @@ public class PassengerServiceImp implements PassengerService{
 		
 		 
 	}
-	
+	 public void setPotentialFailure(PotentialFailure potentialFailure) {
+	        this.potentialFailure = potentialFailure;
+	    }
 
 }
