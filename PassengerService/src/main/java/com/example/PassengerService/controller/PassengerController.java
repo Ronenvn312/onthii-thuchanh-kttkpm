@@ -90,7 +90,10 @@ public class PassengerController {
 	public Passenger insertPassenger(@RequestBody Passenger passenger) {
 		return passengerService.insertPassenger(passenger);
 	}
-
+	@GetMapping("/getid")
+	public Passenger getPassenger(@RequestParam("id") int passengerID) {
+		return passengerService.findById(passengerID);
+	}
 	@GetMapping("/billing")
 	public Billing getBillingByPassengerId(@RequestParam("passengerId") int passengerId) {
 		return passengerService.getBillingByPassengerId(passengerId);

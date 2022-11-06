@@ -5,7 +5,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,20 +26,37 @@ public class PassengerServiceImp implements PassengerService{
 	
 	static String url_billing = "http://localhost:9080/billing";
 	private static RestTemplate RestTemplate = new RestTemplate();
+	
+	
 	@Autowired
 	private PassengerRespository passengerRespository;
-
+	
+	private final String PASSENGER_CACHE = "PASSENGER";
+	
+	@Autowired
+    RedisTemplate<String, Object> redisTemplate;
+    private HashOperations<String, Integer, Passenger> hashOperations;
+    
+    @PostConstruct
+    private void intializeHashOperations() {
+        hashOperations = redisTemplate.opsForHash();
+    }
 	@Override
 	public List<Passenger> findAll() {
-		// TODO Auto-generated method stub
-		return passengerRespository.findAll();
+		List<Passenger> passengers = passengerRespository.findAll();
+		return passengers;
 	}
 	@Override
 	public Passenger insertPassenger(Passenger passenger) {
-		// TODO Auto-generated method stub
+		hashOperations.put(PASSENGER_CACHE, passenger.getPassengerId(), passenger);
 		return passengerRespository.save(passenger);
 	}
-
+	@Override
+	public Passenger findById(int passengerId) {
+		// TODO Auto-generated method stub
+		return hashOperations.get(PASSENGER_CACHE, passengerId);
+	}
+	
 	@Override
 	public Billing getBillingByPassengerId(int passengerId) {
 		Billing billing = RestTemplate.getForEntity(url_billing+"/find?passengerId="+passengerId, Billing.class).getBody();
@@ -63,5 +84,6 @@ public class PassengerServiceImp implements PassengerService{
 	 public void setPotentialFailure(PotentialFailure potentialFailure) {
 	        this.potentialFailure = potentialFailure;
 	    }
+	
 
 }

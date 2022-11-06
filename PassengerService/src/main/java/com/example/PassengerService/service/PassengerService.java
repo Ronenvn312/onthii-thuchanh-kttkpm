@@ -13,4 +13,5 @@ public interface PassengerService {
 	public Billing getBillingByPassengerId(int passengerId);
 	public Billing httpSearchBill(int passengerId) throws IOException;
 	public void setPotentialFailure(PotentialFailure potentialFailure);
+	public Passenger findById(int passengerId);
 }
