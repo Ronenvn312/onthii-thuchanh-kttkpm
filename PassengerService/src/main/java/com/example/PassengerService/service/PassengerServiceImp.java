@@ -1,5 +1,9 @@
 package com.example.PassengerService.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +26,6 @@ public class PassengerServiceImp implements PassengerService{
 		// TODO Auto-generated method stub
 		return passengerRespository.findAll();
 	}
-
 	@Override
 	public Passenger insertPassenger(Passenger passenger) {
 		// TODO Auto-generated method stub
@@ -33,6 +36,25 @@ public class PassengerServiceImp implements PassengerService{
 	public Billing getBillingByPassengerId(int passengerId) {
 		Billing billing = RestTemplate.getForEntity(url_billing+"/find?passengerId="+passengerId, Billing.class).getBody();
 		return billing;
+	}
+	@Override
+	public Billing httpSearchBill(int passengerId) throws IOException{
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss SSS");
+		 System.out.println("Searching for flights; current time = " + LocalDateTime.now().format(formatter));
+		
+		 Billing billing = new Billing();
+	
+			 billing = RestTemplate.getForEntity(url_billing+"/find?passengerId="+passengerId, Billing.class).getBody();
+				if (billing ==null ) {
+					System.out.println("Billing data initialization in progress, cannot search !");
+					Billing billing2 = new Billing(0, "no bill", 0, passengerId);
+		            return billing2;
+				}else {
+					 System.out.println("Flight search successful");
+						return billing;
+				}
+		
+		 
 	}
 	
 
